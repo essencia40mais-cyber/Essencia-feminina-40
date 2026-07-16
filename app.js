@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 1. ESCREVA AQUI O TEXTO QUE VOCÊ QUER QUE APAREÇA EM CADA PLANO:
             // (O primeiro texto é para o Plano 1, o segundo para o Plano 2, etc.)
             const textosDesconto = [
-                "10% OFF - Equivalente a R$ 43,90/mês",   // Plano 1 (Comunidade)
+                "13s",   // Plano 1 (Comunidade)
                 "10% OFF - Equivalente a R$ 79,10/mês",   // Plano 2 (Caminho Guiado)
                 "10% OFF - Equivalente a R$ 140,70/mês",  // Plano 3 (Cuidado Integral)
                 "10% OFF - Equivalente a R$ 228,70/mês"   // Plano 4 (Acompanhamento Personal)
