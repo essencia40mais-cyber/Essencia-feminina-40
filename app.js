@@ -28,37 +28,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 2. TOGGLE MENSAL/ANUAL (Com cálculo de 12% de desconto)
+    // 2. TOGGLE MENSAL/ANUAL (Leitura direta dos atributos do HTML)
     // ==========================================================================
     const billingToggle = document.querySelector('.billing-toggle');
     const monthlyLabel = document.querySelector('.label-monthly');
     const annualLabel = document.querySelector('.label-annual');
-    const priceElements = document.querySelectorAll('.plan-pricing .value');
 
     if (billingToggle) {
         billingToggle.addEventListener('click', () => {
-            // Alterna a classe que move a bolinha
+            // Alterna a classe que move a bolinha do toggle
             billingToggle.classList.toggle('annual');
             const isAnnual = billingToggle.classList.contains('annual');
 
-            // Muda a cor do texto Mensal/Anual
+            // Muda a cor ativa do texto Mensal/Anual
             if (monthlyLabel && annualLabel) {
                 monthlyLabel.classList.toggle('active', !isAnnual);
                 annualLabel.classList.toggle('active', isAnnual);
             }
 
-            // Calcula e atualiza os preços na tela
-            priceElements.forEach(el => {
-                // Pega o valor base do atributo data-monthly-price (ex: "89.90")
-                const basePrice = parseFloat(el.getAttribute('data-monthly-price').replace(',', '.'));
+            // Seleciona todos os containers de preço
+            const pricingContainers = document.querySelectorAll('.plan-pricing');
+
+            pricingContainers.forEach(container => {
+                const valueEl = container.querySelector('.value');
+                const periodEl = container.querySelector('.period');
                 
-                if (isAnnual) {
-                    // Aplica 12% de desconto (multiplica por 0.88)
-                    const discountedPrice = basePrice * 0.88;
-                    el.textContent = discountedPrice.toFixed(2).replace('.', ',');
-                } else {
-                    // Volta para o preço mensal normal
-                    el.textContent = basePrice.toFixed(2).replace('.', ',');
+                if (valueEl) {
+                    // Obtém os valores pré-definidos no HTML
+                    const priceMensal = container.getAttribute('data-mensal');
+                    const priceAnual = container.getAttribute('data-anual');
+                    
+                    if (isAnnual) {
+                        valueEl.textContent = priceAnual;
+                        if (periodEl) periodEl.textContent = '/ano'; // Altera o sufixo visualmente
+                    } else {
+                        valueEl.textContent = priceMensal;
+                        if (periodEl) periodEl.textContent = '/mês'; // Retorna ao padrão mensal
+                    }
                 }
             });
         });
