@@ -28,11 +28,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 2. TOGGLE MENSAL/ANUAL (Seguro contra falhas e compatível com seu HTML)
+    // 2. TOGGLE MENSAL/ANUAL (EDITÁVEL DIRETAMENTE AQUI NO SCRIPT!)
     // ==========================================================================
-    const billingToggle = document.getElementById('billing-switcher') || document.querySelector('.billing-toggle');
-    const monthlyLabel = document.getElementById('label-mensal') || document.querySelector('.label-monthly');
-    const annualLabel = document.getElementById('label-anual') || document.querySelector('.label-annual');
+    
+    // 👇 EDITE OS VALORES E OS TEXTOS DE DESCONTO DIRETAMENTE NESSAS LINHAS:
+
+    // --- PLANO 1 (Comunidade) ---
+    const mensalPlano1 = "49,90";
+    const anualPlano1 = "43,90";
+    const textoDesconto1 = "10% OFF - R$ 43,90 por mês"; // Seu texto que aparece embaixo
+
+    // --- PLANO 2 (Caminho Guiado) ---
+    const mensalPlano2 = "89,90";
+    const anualPlano2 = "79,10";
+    const textoDesconto2 = "10% OFF - R$ 79,10 por mês"; // Seu texto que aparece embaixo
+
+    // --- PLANO 3 (Cuidado Integral) ---
+    const mensalPlano3 = "159,90";
+    const anualPlano3 = "140,70";
+    const textoDesconto3 = "10% OFF - R$ 140,70 por mês"; // Seu texto que aparece embaixo
+
+    // --- PLANO 4 (Acompanhamento Personal) ---
+    const mensalPlano4 = "259,90";
+    const anualPlano4 = "228,70";
+    const textoDesconto4 = "10% OFF - R$ 228,70 por mês"; // Seu texto que aparece embaixo
+
+    // --------------------------------------------------------------------------
+    // Daqui para baixo você não precisa mexer em nada. O JS faz o trabalho:
+    const billingToggle = document.querySelector('.billing-toggle');
+    const monthlyLabel = document.querySelector('.label-monthly');
+    const annualLabel = document.querySelector('.label-annual');
+    const priceElements = document.querySelectorAll('.plan-pricing .value');
 
     if (billingToggle) {
         billingToggle.addEventListener('click', () => {
@@ -44,25 +70,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 annualLabel.classList.toggle('active', isAnnual);
             }
 
-            const pricingContainers = document.querySelectorAll('.plan-pricing');
+            const precosMensais = [mensalPlano1, mensalPlano2, mensalPlano3, mensalPlano4];
+            const precosAnuais = [anualPlano1, anualPlano2, anualPlano3, anualPlano4];
+            const textosDesconto = [textoDesconto1, textoDesconto2, textoDesconto3, textoDesconto4];
 
-            pricingContainers.forEach(container => {
-                const valueEl = container.querySelector('.value');
-                const periodEl = container.querySelector('.period');
-                const discountEl = container.querySelector('.discount-note');
+            priceElements.forEach((el, index) => {
+                const parentContainer = el.closest('.plan-pricing');
                 
-                if (valueEl) {
-                    const priceMensal = container.getAttribute('data-mensal');
-                    const priceAnual = container.getAttribute('data-anual');
+                // Cria o elemento de texto se ele não existir na página
+                let discountSub = parentContainer ? parentContainer.querySelector('.js-discount-subtitle') : null;
+                if (parentContainer && !discountSub) {
+                    discountSub = document.createElement('div');
+                    discountSub.className = 'js-discount-subtitle';
+                    discountSub.style.fontSize = '0.8rem';
+                    discountSub.style.color = '#107c41'; // Cor verde para destacar o desconto
+                    discountSub.style.fontWeight = 'bold';
+                    discountSub.style.marginTop = '4px';
+                    discountSub.style.display = 'none';
+                    parentContainer.appendChild(discountSub);
+                }
+
+                if (isAnnual) {
+                    // Altera o preço para o valor anual digitado por você lá em cima
+                    el.textContent = precosAnuais[index];
                     
-                    if (isAnnual) {
-                        valueEl.textContent = priceAnual;
-                        if (periodEl) periodEl.textContent = '/mês';
-                        if (discountEl) discountEl.style.display = 'block';
-                    } else {
-                        valueEl.textContent = priceMensal;
-                        if (periodEl) periodEl.textContent = '/mês';
-                        if (discountEl) discountEl.style.display = 'none';
+                    // Mostra o texto que você editou
+                    if (discountSub && textosDesconto[index]) {
+                        discountSub.textContent = textosDesconto[index];
+                        discountSub.style.display = 'block';
+                    }
+                } else {
+                    // Retorna para o preço mensal digitado por você lá em cima
+                    el.textContent = precosMensais[index];
+                    
+                    // Oculta o texto de desconto
+                    if (discountSub) {
+                        discountSub.style.display = 'none';
                     }
                 }
             });
