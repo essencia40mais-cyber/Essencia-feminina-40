@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 2. TOGGLE MENSAL/ANUAL (Leitura direta dos atributos do HTML)
+    // 2. TOGGLE MENSAL/ANUAL (Feito 100% no JS - Sem mexer no HTML!)
     // ==========================================================================
     const billingToggle = document.querySelector('.billing-toggle');
     const monthlyLabel = document.querySelector('.label-monthly');
@@ -36,34 +36,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (billingToggle) {
         billingToggle.addEventListener('click', () => {
-            // Alterna a classe que move a bolinha do toggle
+            // Liga/desliga o botão
             billingToggle.classList.toggle('annual');
             const isAnnual = billingToggle.classList.contains('annual');
 
-            // Muda a cor ativa do texto Mensal/Anual
+            // Muda a cor do texto "Mensal/Anual"
             if (monthlyLabel && annualLabel) {
                 monthlyLabel.classList.toggle('active', !isAnnual);
                 annualLabel.classList.toggle('active', isAnnual);
             }
 
-            // Seleciona todos os containers de preço
+            // 1. ESCREVA AQUI O TEXTO QUE VOCÊ QUER QUE APAREÇA EM CADA PLANO:
+            // (O primeiro texto é para o Plano 1, o segundo para o Plano 2, etc.)
+            const textosDesconto = [
+                "10% OFF - Equivalente a R$ 43,90/mês",   // Plano 1 (Comunidade)
+                "10% OFF - Equivalente a R$ 79,10/mês",   // Plano 2 (Caminho Guiado)
+                "10% OFF - Equivalente a R$ 140,70/mês",  // Plano 3 (Cuidado Integral)
+                "10% OFF - Equivalente a R$ 228,70/mês"   // Plano 4 (Acompanhamento Personal)
+            ];
+
             const pricingContainers = document.querySelectorAll('.plan-pricing');
 
-            pricingContainers.forEach(container => {
+            pricingContainers.forEach((container, index) => {
                 const valueEl = container.querySelector('.value');
                 const periodEl = container.querySelector('.period');
                 
+                // O JS cria o textinho de desconto na hora (sem precisar mexer no HTML ou CSS)
+                let discountSub = container.querySelector('.js-discount-subtitle');
+                if (!discountSub) {
+                    discountSub = document.createElement('div');
+                    discountSub.className = 'js-discount-subtitle';
+                    
+                    // Estilo do textinho (pode mudar as cores e tamanhos aqui se quiser)
+                    discountSub.style.fontSize = '0.8rem';
+                    discountSub.style.color = '#107c41'; // Verde bonito de desconto
+                    discountSub.style.fontWeight = 'bold';
+                    discountSub.style.marginTop = '4px';
+                    discountSub.style.display = 'none'; // Começa escondido
+                    
+                    container.appendChild(discountSub);
+                }
+
                 if (valueEl) {
-                    // Obtém os valores pré-definidos no HTML
                     const priceMensal = container.getAttribute('data-mensal');
                     const priceAnual = container.getAttribute('data-anual');
                     
                     if (isAnnual) {
+                        // Quando muda para anual:
                         valueEl.textContent = priceAnual;
-                        if (periodEl) periodEl.textContent = '/ano'; // Altera o sufixo visualmente
+                        if (periodEl) periodEl.textContent = '/mês';
+                        
+                        // Mostra o texto personalizado que você definiu na lista lá em cima
+                        discountSub.textContent = textosDesconto[index];
+                        discountSub.style.display = 'block';
                     } else {
+                        // Quando volta para mensal:
                         valueEl.textContent = priceMensal;
-                        if (periodEl) periodEl.textContent = '/mês'; // Retorna ao padrão mensal
+                        if (periodEl) periodEl.textContent = '/mês';
+                        
+                        // Esconde o texto de desconto
+                        discountSub.style.display = 'none';
                     }
                 }
             });
