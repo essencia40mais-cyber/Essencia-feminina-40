@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 2. TOGGLE MENSAL/ANUAL (Simples, limpo e direto)
+    // 2. TOGGLE MENSAL/ANUAL (Seguro contra falhas e compatível com seu HTML)
     // ==========================================================================
     const billingToggle = document.getElementById('billing-switcher') || document.querySelector('.billing-toggle');
     const monthlyLabel = document.getElementById('label-mensal') || document.querySelector('.label-monthly');
@@ -36,18 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (billingToggle) {
         billingToggle.addEventListener('click', () => {
-            // Liga/desliga o botão
-            billingToggle.classList.toggle('active');
             billingToggle.classList.toggle('annual');
-            const isAnnual = billingToggle.classList.contains('active') || billingToggle.classList.contains('annual');
+            const isAnnual = billingToggle.classList.contains('annual');
 
-            // Altera o estado visual dos textos "Mensal" e "Anual"
             if (monthlyLabel && annualLabel) {
                 monthlyLabel.classList.toggle('active', !isAnnual);
                 annualLabel.classList.toggle('active', isAnnual);
             }
 
-            // Seleciona as caixas de preço
             const pricingContainers = document.querySelectorAll('.plan-pricing');
 
             pricingContainers.forEach(container => {
@@ -60,18 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const priceAnual = container.getAttribute('data-anual');
                     
                     if (isAnnual) {
-                        // Muda para o valor anual
                         valueEl.textContent = priceAnual;
                         if (periodEl) periodEl.textContent = '/mês';
-                        
-                        // MOSTRA o texto de desconto do HTML
                         if (discountEl) discountEl.style.display = 'block';
                     } else {
-                        // Volta para o valor mensal
                         valueEl.textContent = priceMensal;
                         if (periodEl) periodEl.textContent = '/mês';
-                        
-                        // ESCONDE o texto de desconto
                         if (discountEl) discountEl.style.display = 'none';
                     }
                 }
