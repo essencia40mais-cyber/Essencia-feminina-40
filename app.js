@@ -1,42 +1,227 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+/* ==========================================================================
+   APP.JS - FRONTEND - ESSÊNCIA FEMININA 40+
+   Gerenciamento de Interações, Animações, Menu, Toggle de Preços e Quiz
+   ========================================================================== */
 
-const app = express();
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
 
-// --- Middlewares ---
-app.use(helmet()); // Proteção de cabeçalhos HTTP
-app.use(cors());   // Permite requisições de outras origens
-app.use(morgan('dev')); // Logger de requisições
-app.use(express.json()); // Parsing de JSON no corpo da requisição
+    // ==========================================================================
+    // 1. MENU MOBILE (HAMBURGUER)
+    // ==========================================================================
+    const toggleMenu = document.querySelector('.mobile-menu-toggle');
+    const nav = document.querySelector('.main-navigation');
+    
+    if (toggleMenu && nav) {
+        toggleMenu.addEventListener('click', () => {
+            toggleMenu.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
 
-// --- Rotas ---
-// Exemplo de rota de saúde (Health Check)
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK', timestamp: new Date() });
+        // Fechar o menu ao clicar em um link
+        nav.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                toggleMenu.classList.remove('active');
+                nav.classList.remove('active');
+            });
+        });
+    }
+
+    // ==========================================================================
+    // 2. TOGGLE MENSAL/ANUAL (Com cálculo de 12% de desconto)
+    // ==========================================================================
+    const billingToggle = document.querySelector('.billing-toggle');
+    const monthlyLabel = document.querySelector('.label-monthly');
+    const annualLabel = document.querySelector('.label-annual');
+    const priceElements = document.querySelectorAll('.plan-pricing .value');
+
+    if (billingToggle) {
+        billingToggle.addEventListener('click', () => {
+            // Alterna a classe que move a bolinha
+            billingToggle.classList.toggle('annual');
+            const isAnnual = billingToggle.classList.contains('annual');
+
+            // Muda a cor do texto Mensal/Anual
+            if (monthlyLabel && annualLabel) {
+                monthlyLabel.classList.toggle('active', !isAnnual);
+                annualLabel.classList.toggle('active', isAnnual);
+            }
+
+            // Calcula e atualiza os preços na tela
+            priceElements.forEach(el => {
+                // Pega o valor base do atributo data-monthly-price (ex: "89.90")
+                const basePrice = parseFloat(el.getAttribute('data-monthly-price').replace(',', '.'));
+                
+                if (isAnnual) {
+                    // Aplica 12% de desconto (multiplica por 0.88)
+                    const discountedPrice = basePrice * 0.88;
+                    el.textContent = discountedPrice.toFixed(2).replace('.', ',');
+                } else {
+                    // Volta para o preço mensal normal
+                    el.textContent = basePrice.toFixed(2).replace('.', ',');
+                }
+            });
+        });
+    }
+
+    // ==========================================================================
+    // 3. ACORDEON DE DÚVIDAS FREQUENTES (FAQ)
+    // ==========================================================================
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const header = item.querySelector('.faq-header');
+        if (header) {
+            header.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Fecha todas as outras sanfonas antes de abrir a nova
+                faqItems.forEach(i => i.classList.remove('active'));
+                
+                // Se não estava ativa, abre a que foi clicada
+                if (!isActive) item.classList.add('active');
+            });
+        }
+    });
+
+    // ==========================================================================
+    // 4. LÓGICA DO QUESTIONÁRIO INTELIGENTE (QUIZ)
+    // ==========================================================================
+    const btnNext = document.getElementById('btn-next-question');
+    const btnRestart = document.getElementById('btn-restart-quiz');
+    
+    if (btnNext) {
+        const questions = [
+            {
+                title: "Qual é o seu principal objetivo de saúde hoje?",
+                options: [
+                    { text: "Fazer um mapeamento geral e entender meu corpo.", value: "entrada" },
+                    { text: "Gerenciar sintomas específicos (sono, menopausa, energia).", value: "regular" },
+                    { text: "Transformação completa com acompanhamento diário.", value: "premium" }
+                ]
+            },
+            {
+                title: "Qual nível de suporte você sente que precisa neste momento?",
+                options: [
+                    { text: "Quero diretrizes claras, mas prefiro seguir no meu próprio ritmo.", value: "entrada" },
+                    { text: "Preciso de encontros mensais e motivação de uma comunidade.", value: "regular" },
+                    { text: "Quero suporte médico VIP, com respostas rápidas.", value: "premium" }
+                ]
+            },
+            {
+                title: "Como está sua rotina de exames preventivos?",
+                options: [
+                    { text: "Faz muito tempo que não faço um check-up detalhado.", value: "entrada" },
+                    { text: "Faço o básico, mas sinto que falta uma visão integrativa.", value: "regular" },
+                    { text: "Tenho exames recentes, mas quero otimizar minha longevidade.", value: "premium" }
+                ]
+            }
+        ];
+
+        const plans = {
+            "entrada": {
+                title: "Avaliação Essencial",
+                desc: "Seu momento pede clareza. Faremos um mapeamento completo da sua saúde atual, entregando um plano de ação claro.",
+                features: ["Mapeamento 360º de Sintomas", "Consulta Inicial de Diagnóstico", "Plano de Ação (PDF)"]
+            },
+            "regular": {
+                title: "Plano Caminho Guiado",
+                desc: "Você precisa de constância e acolhimento. O plano Guiado oferece o equilíbrio perfeito entre autonomia e suporte.",
+                features: ["Avaliação Inclusa", "Encontros Mensais em Grupo", "Comunidade Exclusiva"]
+            },
+            "premium": {
+                title: "Acompanhamento Personal",
+                desc: "Você busca excelência e otimização. Acompanhamento lado a lado com nossa equipe médica e suporte premium.",
+                features: ["Consultas Médicas Bimestrais", "Acesso via WhatsApp", "Concierge de Saúde"]
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { entrada: 0, regular: 0, premium: 0 };
+        let selectedValue = null;
+
+        const questionTitle = document.getElementById('quiz-question-title');
+        const optionsGrid = document.getElementById('quiz-options');
+        const progressBar = document.getElementById('quiz-progress');
+        const questionArea = document.getElementById('quiz-question-area');
+        const resultArea = document.getElementById('quiz-result-area');
+
+        function renderQuestion() {
+            const question = questions[currentQuestionIndex];
+            questionTitle.textContent = question.title;
+            optionsGrid.innerHTML = '';
+            selectedValue = null;
+            btnNext.disabled = true;
+
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            const letters = ['A', 'B', 'C'];
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.dataset.value = option.value;
+                
+                optionDiv.innerHTML = `
+                    <div class="quiz-option-letter">${letters[index]}</div>
+                    <div class="quiz-option-text">${option.text}</div>
+                `;
+
+                optionDiv.addEventListener('click', () => {
+                    document.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
+                    optionDiv.classList.add('selected');
+                    selectedValue = option.value;
+                    btnNext.disabled = false;
+                });
+
+                optionsGrid.appendChild(optionDiv);
+            });
+        }
+
+        function showResult() {
+            let winningPlan = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            if(scores.entrada === scores.regular || scores.regular === scores.premium) winningPlan = "regular";
+
+            const result = plans[winningPlan];
+            document.getElementById('result-title').textContent = result.title;
+            document.getElementById('result-desc').textContent = result.desc;
+            
+            const featuresList = document.getElementById('result-features');
+            featuresList.innerHTML = '';
+            result.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+
+            progressBar.style.width = '100%';
+            questionArea.classList.remove('active');
+            resultArea.classList.add('active');
+        }
+
+        btnNext.addEventListener('click', () => {
+            if (selectedValue) {
+                scores[selectedValue]++;
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    renderQuestion();
+                } else {
+                    showResult();
+                }
+            }
+        });
+
+        if(btnRestart) {
+            btnRestart.addEventListener('click', () => {
+                currentQuestionIndex = 0;
+                scores = { entrada: 0, regular: 0, premium: 0 };
+                resultArea.classList.remove('active');
+                questionArea.classList.add('active');
+                renderQuestion();
+            });
+        }
+
+        renderQuestion();
+    }
 });
-
-// Adicione suas rotas aqui
-// app.use('/api/v1', require('./routes/index'));
-
-// --- Tratamento de Erros ---
-// Rota 404
-app.use((req, res, next) => {
-    res.status(404).json({ error: 'Recurso não encontrado' });
-});
-
-// Middleware de Erro Global
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Algo deu errado no servidor!' });
-});
-
-// --- Iniciar Servidor ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
-
-module.exports = app;
