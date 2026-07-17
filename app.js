@@ -28,37 +28,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 2. TOGGLE MENSAL/ANUAL (EDITÁVEL DIRETAMENTE AQUI NO SCRIPT!)
+    // 2. TOGGLE MENSAL/ANUAL (CORREÇÃO DE COUBE, ALINHAMENTO E ZOOM DE FUNDO)
     // ==========================================================================
-    
-    // 👇 EDITE OS VALORES E OS TEXTOS DE DESCONTO DIRETAMENTE NESSAS LINHAS:
-
-    // --- PLANO 1 (Comunidade) ---
-    const mensalPlano1 = "49,90";
-    const anualPlano1 = "43,90";
-    const textoDesconto1 = "10% OFF - R$ 43,90 por mês"; // Seu texto que aparece embaixo
-
-    // --- PLANO 2 (Caminho Guiado) ---
-    const mensalPlano2 = "89,90";
-    const anualPlano2 = "79,10";
-    const textoDesconto2 = "10% OFF - R$ 79,10 por mês"; // Seu texto que aparece embaixo
-
-    // --- PLANO 3 (Cuidado Integral) ---
-    const mensalPlano3 = "159,90";
-    const anualPlano3 = "140,70";
-    const textoDesconto3 = "10% OFF - R$ 140,70 por mês"; // Seu texto que aparece embaixo
-
-    // --- PLANO 4 (Acompanhamento Personal) ---
-    const mensalPlano4 = "259,90";
-    const anualPlano4 = "228,70";
-    const textoDesconto4 = "10% OFF - R$ 228,70 por mês"; // Seu texto que aparece embaixo
-
-    // --------------------------------------------------------------------------
-    // Daqui para baixo você não precisa mexer em nada. O JS faz o trabalho:
     const billingToggle = document.querySelector('.billing-toggle');
     const monthlyLabel = document.querySelector('.label-monthly');
     const annualLabel = document.querySelector('.label-annual');
-    const priceElements = document.querySelectorAll('.plan-pricing .value');
+    const pricingContainers = document.querySelectorAll('.plan-pricing');
+
+    // 👇 EDITE OS VALORES E OS TEXTOS DE DESCONTO DIRETAMENTE NESSAS LINHAS:
+    const planosConfig = [
+        { mensal: "49,90",  anual: "43,90",  desconto: "10% OFF - R$ 43,90 por mês" },  // Plano 1 (Comunidade)
+        { mensal: "89,90",  anual: "79,10",  desconto: "10% OFF - R$ 79,10 por mês" },  // Plano 2 (Caminho Guiado)
+        { mensal: "159,90", anual: "140,70", desconto: "10% OFF - R$ 140,70 por mês" }, // Plano 3 (Cuidado Integral)
+        { mensal: "259,90", anual: "228,70", desconto: "10% OFF - R$ 228,70 por mês" }  // Plano 4 (Acompanhamento Personal)
+    ];
+
+    // Prepara o layout e cria as legendas de desconto assim que a página carrega.
+    // Isso evita qualquer redimensionamento nos cards e impede que o fundo se mova!
+    pricingContainers.forEach((container, index) => {
+        if (index >= planosConfig.length) return;
+
+        // Limpa resíduos de tags antigas para evitar duplicidade
+        const oldNotes = container.querySelectorAll('.discount-note, .js-discount-subtitle');
+        oldNotes.forEach(el => el.remove());
+
+        // Configura o container para permitir que o desconto quebre a linha e fique embaixo
+        container.style.flexWrap = 'wrap';
+        container.style.justifyContent = 'center';
+
+        // Cria o elemento de desconto
+        const discountSub = document.createElement('div');
+        discountSub.className = 'js-discount-subtitle';
+        discountSub.textContent = planosConfig[index].desconto;
+        
+        // Estilização do texto de desconto (Sempre embaixo e centralizado)
+        discountSub.style.fontSize = '0.8rem';
+        discountSub.style.color = '#107c41'; // Verde destaque
+        discountSub.style.fontWeight = 'bold';
+        discountSub.style.marginTop = '6px';
+        discountSub.style.width = '100%';
+        discountSub.style.textAlign = 'center';
+        
+        // 🔥 RESERVA O ESPAÇO: Fica invisível por padrão, mas ocupando o espaço físico
+        discountSub.style.visibility = 'hidden'; 
+        
+        container.appendChild(discountSub);
+    });
 
     if (billingToggle) {
         billingToggle.addEventListener('click', () => {
@@ -70,42 +85,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 annualLabel.classList.toggle('active', isAnnual);
             }
 
-            const precosMensais = [mensalPlano1, mensalPlano2, mensalPlano3, mensalPlano4];
-            const precosAnuais = [anualPlano1, anualPlano2, anualPlano3, anualPlano4];
-            const textosDesconto = [textoDesconto1, textoDesconto2, textoDesconto3, textoDesconto4];
+            pricingContainers.forEach((container, index) => {
+                if (index >= planosConfig.length) return;
 
-            priceElements.forEach((el, index) => {
-                const parentContainer = el.closest('.plan-pricing');
-                
-                // Cria o elemento de texto se ele não existir na página
-                let discountSub = parentContainer ? parentContainer.querySelector('.js-discount-subtitle') : null;
-                if (parentContainer && !discountSub) {
-                    discountSub = document.createElement('div');
-                    discountSub.className = 'js-discount-subtitle';
-                    discountSub.style.fontSize = '0.8rem';
-                    discountSub.style.color = '#107c41'; // Cor verde para destacar o desconto
-                    discountSub.style.fontWeight = 'bold';
-                    discountSub.style.marginTop = '4px';
-                    discountSub.style.display = 'none';
-                    parentContainer.appendChild(discountSub);
-                }
+                const valueEl = container.querySelector('.value');
+                const discountSub = container.querySelector('.js-discount-subtitle');
 
-                if (isAnnual) {
-                    // Altera o preço para o valor anual digitado por você lá em cima
-                    el.textContent = precosAnuais[index];
-                    
-                    // Mostra o texto que você editou
-                    if (discountSub && textosDesconto[index]) {
-                        discountSub.textContent = textosDesconto[index];
-                        discountSub.style.display = 'block';
-                    }
-                } else {
-                    // Retorna para o preço mensal digitado por você lá em cima
-                    el.textContent = precosMensais[index];
-                    
-                    // Oculta o texto de desconto
-                    if (discountSub) {
-                        discountSub.style.display = 'none';
+                if (valueEl) {
+                    if (isAnnual) {
+                        valueEl.textContent = planosConfig[index].anual;
+                        if (discountSub) {
+                            discountSub.style.visibility = 'visible'; // Mostra o desconto sem alterar a altura do card
+                        }
+                    } else {
+                        valueEl.textContent = planosConfig[index].mensal;
+                        if (discountSub) {
+                            discountSub.style.visibility = 'hidden'; // Oculta mantendo o espaço intacto
+                        }
                     }
                 }
             });
